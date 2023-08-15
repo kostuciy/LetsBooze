@@ -1,36 +1,28 @@
 package com.kostuciy.letsbooze.fragments
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.PopupWindow
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kostuciy.letsbooze.R
 import com.kostuciy.letsbooze.companies.CompanyAdapter
 import com.kostuciy.letsbooze.companies.CompanyMember
+import com.kostuciy.letsbooze.companies.CompanyViewModel
 import com.kostuciy.letsbooze.companies.MemberRegistrationPopup
 
-
-/**
- * A simple [Fragment] subclass.
- * Use the [CompanyFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class CompanyFragment : Fragment() {
     private lateinit var companyRecyclerView: RecyclerView
     private lateinit var addMemberButton: Button
 
     private lateinit var memberRegistrationPopup: MemberRegistrationPopup
 
-    val testData = mutableListOf<CompanyMember>() // TODO: remove
+    private lateinit var companyViewModel: CompanyViewModel
+    private lateinit var membersList: MutableList<CompanyMember> // TODO: remove
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,6 +31,7 @@ class CompanyFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_company, container, false)
 
+        initViewModel()
         initViews(view)
         initListeners(view)
 
@@ -67,10 +60,17 @@ class CompanyFragment : Fragment() {
         }
     }
 
+    private fun initViewModel() {
+        val _companyViewModel : CompanyViewModel by activityViewModels()
+        companyViewModel = _companyViewModel
+
+        membersList = companyViewModel.currentMembersList.toMutableList()
+    }
+
     private fun setRecyclerView(view: View) {
         companyRecyclerView = view.findViewById(R.id.companyRecyclerView)
 
-        val companyAdapter = CompanyAdapter(testData)
+        val companyAdapter = CompanyAdapter(membersList)
         val gridLayoutManager = GridLayoutManager(
             activity, 3,
             GridLayoutManager.VERTICAL,
@@ -85,13 +85,17 @@ class CompanyFragment : Fragment() {
 
     private fun addMember(name: String /*photo: TODO()*/) {
         val newMember = CompanyMember(name)
-        testData += newMember
 
-        companyRecyclerView.adapter!!.notifyItemInserted(testData.size - 1)
+        membersList += newMember
+        companyViewModel.updateList(membersList)
+
+        companyRecyclerView.adapter!!.notifyItemInserted(
+            membersList.size - 1
+        )
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(param1: String, param2: String) = CompanyFragment()
+        fun newInstance() = CompanyFragment()
     }
 }
