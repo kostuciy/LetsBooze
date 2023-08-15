@@ -9,22 +9,5 @@
         android:id="@+id/companyFragment"
         android:name="com.kostuciy.letsbooze.fragments.CompanyFragment"
         android:label="fragment_company"
-        tools:layout="@layout/fragment_company" >
-        <action
-            android:id="@+id/startingMemberRegistration"
-            app:destination="@id/memberCreationFragment" />
-        <argument
-            android:name="newMemberName"
-            app:argType="string"
-            android:defaultValue="Unknown" />
-    </fragment>
-    <fragment
-        android:id="@+id/memberCreationFragment"
-        android:name="com.kostuciy.letsbooze.fragments.MemberCreationFragment"
-        android:label="fragment_member_creation"
-        tools:layout="@layout/fragment_member_creation" >
-        <action
-            android:id="@+id/finishingMemberRegistration"
-            app:destination="@id/companyFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_company" />
 </navigation>
