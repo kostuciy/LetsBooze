@@ -1,5 +1,7 @@
 package com.kostuciy.letsbooze.fragments
 
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,17 +15,21 @@ import com.kostuciy.letsbooze.R
 import com.kostuciy.letsbooze.companies.CompanyAdapter
 import com.kostuciy.letsbooze.companies.CompanyMember
 import com.kostuciy.letsbooze.companies.CompanyViewModel
-import com.kostuciy.letsbooze.companies.MemberRegistrationPopup
+import com.kostuciy.letsbooze.companies.MemberRegistrationManager
 
 class CompanyFragment : Fragment() {
     private lateinit var companyRecyclerView: RecyclerView
     private lateinit var addMemberButton: Button
 
-    private lateinit var memberRegistrationPopup: MemberRegistrationPopup
+    private lateinit var memberRegistrationManager: MemberRegistrationManager
 
     private lateinit var companyViewModel: CompanyViewModel
     private lateinit var membersList: MutableList<CompanyMember> // TODO: remove
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        initViewModel()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -31,33 +37,10 @@ class CompanyFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_company, container, false)
 
-        initViewModel()
         initViews(view)
         initListeners(view)
 
         return view
-    }
-
-    private fun initViews(view: View) {
-        setRecyclerView(view)
-        addMemberButton = view.findViewById(R.id.addMemberButton)
-
-        memberRegistrationPopup = MemberRegistrationPopup(requireActivity())
-        memberRegistrationPopup.setup()
-    }
-
-    private fun initListeners(view: View) {
-        addMemberButton.setOnClickListener {
-            memberRegistrationPopup.show(view)
-        }
-
-        memberRegistrationPopup.addButton.setOnClickListener {
-            val name = memberRegistrationPopup
-                .nameEditText.text.toString()
-
-            addMember(name)
-            memberRegistrationPopup.reset()
-        }
     }
 
     private fun initViewModel() {
@@ -66,13 +49,39 @@ class CompanyFragment : Fragment() {
 
         membersList = companyViewModel.currentMembersList.toMutableList()
     }
+    private fun initViews(view: View) {
+        initRecyclerView(view)
+        addMemberButton = view.findViewById(R.id.addMemberButton)
 
-    private fun setRecyclerView(view: View) {
+        memberRegistrationManager = MemberRegistrationManager(requireActivity())
+        memberRegistrationManager.setupPopup()
+    }
+
+    private fun initListeners(view: View) {
+        addMemberButton.setOnClickListener {
+            memberRegistrationManager.showPopup(view)
+        }
+
+        memberRegistrationManager.addButton.setOnClickListener {
+            val name = memberRegistrationManager
+                .nameEditText.text.toString()
+            val imageDrawable =
+                memberRegistrationManager.photoImageView.drawable
+
+            addMemberToRecyclerView(name, imageDrawable)
+            memberRegistrationManager.dismiss()
+        }
+
+        memberRegistrationManager.pictureSelectButton.setOnClickListener {
+            memberRegistrationManager.openGalleryForResult()
+        }
+    }
+    private fun initRecyclerView(view: View) {
         companyRecyclerView = view.findViewById(R.id.companyRecyclerView)
 
-        val companyAdapter = CompanyAdapter(membersList)
+        val companyAdapter = CompanyAdapter(membersList, view)
         val gridLayoutManager = GridLayoutManager(
-            activity, 3,
+            activity, 4,
             GridLayoutManager.VERTICAL,
             false
         )
@@ -83,11 +92,11 @@ class CompanyFragment : Fragment() {
         }
     }
 
-    private fun addMember(name: String /*photo: TODO()*/) {
-        val newMember = CompanyMember(name)
+    private fun addMemberToRecyclerView(name: String, photoDrawable: Drawable) {
+        val newMember = CompanyMember(name, photoDrawable)
 
         membersList += newMember
-        companyViewModel.updateList(membersList)
+        companyViewModel.addMember(newMember)
 
         companyRecyclerView.adapter!!.notifyItemInserted(
             membersList.size - 1

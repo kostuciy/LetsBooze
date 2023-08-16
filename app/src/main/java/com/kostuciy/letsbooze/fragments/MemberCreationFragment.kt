@@ -23,7 +23,7 @@ class MemberCreationFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view =
-            inflater.inflate(R.layout.fragment_member_registration, container, false)
+            inflater.inflate(R.layout.member_registration_popup, container, false)
 
 
 

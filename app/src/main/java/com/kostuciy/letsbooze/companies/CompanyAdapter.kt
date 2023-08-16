@@ -1,29 +1,55 @@
 package com.kostuciy.letsbooze.companies
 
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.RecyclerView
 import com.kostuciy.letsbooze.R
 
-class CompanyAdapter(private val memberList: List<CompanyMember>) :
-    RecyclerView.Adapter<CompanyAdapter.MemberViewHolder>() {
 
+class CompanyAdapter(
+    private val memberList: List<CompanyMember>,
+    private val viewContext: View
+    ) :
+    RecyclerView.Adapter<CompanyAdapter.MemberViewHolder>() {
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder)
      */
+
     class MemberViewHolder(memberView: View) : RecyclerView.ViewHolder(memberView) {
         private val nameTextView: TextView =
             memberView.findViewById(R.id.nameTextView)
         private val photoImageView: ImageView =
             memberView.findViewById(R.id.photoImageView)
 
-        fun setData(memberData: CompanyMember) {
+        fun setData(memberData: CompanyMember, viewContext: View) {
             nameTextView.text = memberData.name
-            photoImageView.setImageResource(R.drawable.ic_launcher_background)
+
+            setLowerImageResolution(photoImageView, memberData.photo)
+            setImageSize(photoImageView, viewContext.width / 4)
+        }
+
+        private fun setImageSize(photoImageView: ImageView, sideSize: Int) {
+            photoImageView.apply {
+                adjustViewBounds = true
+                layoutParams = ViewGroup.LayoutParams(sideSize, sideSize)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+        }
+
+        private fun setLowerImageResolution(photoImageView: ImageView, drawable: Drawable) {
+            val bitmapImage = drawable.toBitmap()
+            val newHeight = (bitmapImage.height * (512.0 / bitmapImage.width)).toInt()
+            val scaledDrawable =
+                Bitmap.createScaledBitmap(bitmapImage, 512, newHeight, true)
+
+            photoImageView.setImageBitmap(scaledDrawable)
         }
     }
 
@@ -43,7 +69,7 @@ class CompanyAdapter(private val memberList: List<CompanyMember>) :
         // contents of the view with that element
         val currentMember = memberList[position]
 
-        memberViewHolder.setData(currentMember)
+        memberViewHolder.setData(currentMember, viewContext)
     }
 
     // Return the size of your dataset (invoked by the layout manager)
