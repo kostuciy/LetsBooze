@@ -45,9 +45,11 @@ class CompanyAdapter(
 
         private fun setLowerImageResolution(photoImageView: ImageView, drawable: Drawable) {
             val bitmapImage = drawable.toBitmap()
-            val newHeight = (bitmapImage.height * (512.0 / bitmapImage.width)).toInt()
+            val lowerWidth = 312
+            val lowerHeight =
+                (bitmapImage.height * (lowerWidth * 1.0 / bitmapImage.width)).toInt()
             val scaledDrawable =
-                Bitmap.createScaledBitmap(bitmapImage, 512, newHeight, true)
+                Bitmap.createScaledBitmap(bitmapImage, lowerWidth, lowerHeight, true)
 
             photoImageView.setImageBitmap(scaledDrawable)
         }
