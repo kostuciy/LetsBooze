@@ -18,7 +18,7 @@ import androidx.fragment.app.FragmentActivity
 import com.kostuciy.letsbooze.R
 
 
-class MemberRegistrationManager(private val context: FragmentActivity)
+class MemberRegistrationPopup(context: FragmentActivity)
     : PopupWindow() {
     private val registrationView: View =
         LayoutInflater.from(context)
@@ -28,11 +28,10 @@ class MemberRegistrationManager(private val context: FragmentActivity)
         registrationView.findViewById(R.id.photoImageView)
     val addButton: Button =
         registrationView.findViewById(R.id.addButton)
-    val nameEditText: EditText =
-        registrationView.findViewById(R.id.nameEditText)
     val pictureSelectButton: Button =
         registrationView.findViewById(R.id.pictureSelectButton)
-
+    val nameEditText: EditText =
+        registrationView.findViewById(R.id.nameEditText)
 
     fun setupPopup() {
         photoImageView.setImageResource(R.drawable.ic_launcher_foreground) // TODO(set another default)

@@ -1,7 +1,6 @@
 package com.kostuciy.letsbooze.fragments
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,21 +14,24 @@ import com.kostuciy.letsbooze.R
 import com.kostuciy.letsbooze.companies.CompanyAdapter
 import com.kostuciy.letsbooze.companies.CompanyMember
 import com.kostuciy.letsbooze.companies.CompanyViewModel
-import com.kostuciy.letsbooze.companies.MemberRegistrationManager
+import com.kostuciy.letsbooze.companies.MemberRegistrationPopup
+import com.kostuciy.letsbooze.utils.ImageResolutionChanger
 
 class CompanyFragment : Fragment() {
-    private lateinit var companyRecyclerView: RecyclerView
     private lateinit var addMemberButton: Button
-
-    private lateinit var memberRegistrationManager: MemberRegistrationManager
-
+    private lateinit var companyRecyclerView: RecyclerView
     private lateinit var companyViewModel: CompanyViewModel
-    private lateinit var membersList: MutableList<CompanyMember> // TODO: remove
+
+    private lateinit var memberRegistrationPopup: MemberRegistrationPopup
+    private lateinit var imageResolutionChanger: ImageResolutionChanger
+
+    private lateinit var membersList: MutableList<CompanyMember>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initViewModel()
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,6 +39,7 @@ class CompanyFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_company, container, false)
 
+        imageResolutionChanger = ImageResolutionChanger()
         initViews(view)
         initListeners(view)
 
@@ -49,37 +52,40 @@ class CompanyFragment : Fragment() {
 
         membersList = companyViewModel.currentMembersList.toMutableList()
     }
+
     private fun initViews(view: View) {
         initRecyclerView(view)
+
         addMemberButton = view.findViewById(R.id.addMemberButton)
 
-        memberRegistrationManager = MemberRegistrationManager(requireActivity())
-        memberRegistrationManager.setupPopup()
+        memberRegistrationPopup = MemberRegistrationPopup(requireActivity())
+        memberRegistrationPopup.setupPopup()
     }
 
     private fun initListeners(view: View) {
         addMemberButton.setOnClickListener {
-            memberRegistrationManager.showPopup(view)
+            memberRegistrationPopup.showPopup(view)
         }
 
-        memberRegistrationManager.addButton.setOnClickListener {
-            val name = memberRegistrationManager
+        memberRegistrationPopup.addButton.setOnClickListener {
+            val name = memberRegistrationPopup
                 .nameEditText.text.toString()
             val imageDrawable =
-                memberRegistrationManager.photoImageView.drawable
+                memberRegistrationPopup.photoImageView.drawable
 
             addMemberToRecyclerView(name, imageDrawable)
-            memberRegistrationManager.dismiss()
+            memberRegistrationPopup.dismiss()
         }
 
-        memberRegistrationManager.pictureSelectButton.setOnClickListener {
-            memberRegistrationManager.openGalleryForResult()
+        memberRegistrationPopup.pictureSelectButton.setOnClickListener {
+            memberRegistrationPopup.openGalleryForResult()
         }
     }
+
     private fun initRecyclerView(view: View) {
         companyRecyclerView = view.findViewById(R.id.companyRecyclerView)
 
-        val companyAdapter = CompanyAdapter(membersList, view)
+        val companyAdapter = CompanyAdapter(membersList, view, imageResolutionChanger)
         val gridLayoutManager = GridLayoutManager(
             activity, 4,
             GridLayoutManager.VERTICAL,
