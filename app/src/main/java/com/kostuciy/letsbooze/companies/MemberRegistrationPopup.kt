@@ -14,11 +14,14 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.FragmentActivity
 import com.kostuciy.letsbooze.R
 
 
-class MemberRegistrationPopup(context: FragmentActivity)
+class MemberRegistrationPopup(
+    context: FragmentActivity,
+)
     : PopupWindow() {
     private val registrationView: View =
         LayoutInflater.from(context)
@@ -34,7 +37,7 @@ class MemberRegistrationPopup(context: FragmentActivity)
         registrationView.findViewById(R.id.nameEditText)
 
     fun setupPopup() {
-        photoImageView.setImageResource(R.drawable.ic_launcher_foreground) // TODO(set another default)
+        photoImageView.setImageResource(R.drawable.ic_launcher_foreground) // TODO: set another default
 
         contentView = registrationView
         height = WindowManager.LayoutParams.WRAP_CONTENT
