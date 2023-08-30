@@ -2,11 +2,8 @@ package com.kostuciy.letsbooze
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import com.kostuciy.letsbooze.companies.CompanyViewModel
 
 class MainActivity : AppCompatActivity() {
 //    val companyViewModel: CompanyViewModel by viewModels()

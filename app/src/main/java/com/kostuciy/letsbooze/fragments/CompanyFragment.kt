@@ -1,11 +1,12 @@
 package com.kostuciy.letsbooze.fragments
 
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -13,23 +14,27 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kostuciy.letsbooze.R
 import com.kostuciy.letsbooze.companies.CompanyAdapter
 import com.kostuciy.letsbooze.companies.CompanyMember
-import com.kostuciy.letsbooze.companies.CompanyViewModel
+import com.kostuciy.letsbooze.data.CompanyViewModel
 import com.kostuciy.letsbooze.companies.MemberRegistrationPopup
-import com.kostuciy.letsbooze.utils.ImageResolutionChanger
+import com.kostuciy.letsbooze.data.InternalStorageManager
+import com.kostuciy.letsbooze.utils.ImageScaler
 
 class CompanyFragment : Fragment() {
     private lateinit var addMemberButton: Button
     private lateinit var companyRecyclerView: RecyclerView
+
     private lateinit var companyViewModel: CompanyViewModel
+//    private val companyViewModel: CompanyViewModel by activityViewModels()
+    private lateinit var internalStorageManager: InternalStorageManager
 
     private lateinit var memberRegistrationPopup: MemberRegistrationPopup
-    private lateinit var imageResolutionChanger: ImageResolutionChanger
+    private lateinit var imageScaler: ImageScaler
 
-    private lateinit var membersList: MutableList<CompanyMember>
+    private lateinit var membersListCopy: MutableList<CompanyMember>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initViewModel()
+//        initDataStorages()
     }
 
     override fun onCreateView(
@@ -39,23 +44,36 @@ class CompanyFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_company, container, false)
 
-        imageResolutionChanger = ImageResolutionChanger()
+        initDataStorages()
+
+        imageScaler = ImageScaler()
         initViews(view)
         initListeners(view)
 
         return view
     }
 
-    private fun initViewModel() {
+//    override fun onPause() {
+//        super.onPause()
+//        companyViewModel.saveMemberList()
+//    }
+
+    private fun initDataStorages() {
+////        ViewModel
         val _companyViewModel : CompanyViewModel by activityViewModels()
         companyViewModel = _companyViewModel
 
-        membersList = companyViewModel.currentMembersList.toMutableList()
+//        companyViewModel.uploadMemberList()
+        membersListCopy = companyViewModel.currentMembersList.toMutableList()
+
+//        InternalStorageManager
+        internalStorageManager = InternalStorageManager(
+            requireActivity().application
+        )
     }
 
     private fun initViews(view: View) {
         initRecyclerView(view)
-
         addMemberButton = view.findViewById(R.id.addMemberButton)
 
         memberRegistrationPopup = MemberRegistrationPopup(requireActivity())
@@ -67,25 +85,32 @@ class CompanyFragment : Fragment() {
             memberRegistrationPopup.showPopup(view)
         }
 
-        memberRegistrationPopup.addButton.setOnClickListener {
-            val name = memberRegistrationPopup
-                .nameEditText.text.toString()
-            val imageDrawable =
-                memberRegistrationPopup.photoImageView.drawable
+        memberRegistrationPopup.apply {
+            addButton.setOnClickListener {
+                val name =
+                    this.nameEditText.text.toString()
+                val imageBitmap =
+                    this.photoImageView.drawable.toBitmap()
 
-            addMemberToRecyclerView(name, imageDrawable)
-            memberRegistrationPopup.dismiss()
-        }
+                processNewMember(name, imageBitmap)
+                memberRegistrationPopup.dismiss()
+            }
 
-        memberRegistrationPopup.pictureSelectButton.setOnClickListener {
-            memberRegistrationPopup.openGalleryForResult()
+            pictureSelectButton.setOnClickListener {
+                memberRegistrationPopup.openGalleryForResult()
+            }
         }
     }
 
     private fun initRecyclerView(view: View) {
         companyRecyclerView = view.findViewById(R.id.companyRecyclerView)
 
-        val companyAdapter = CompanyAdapter(membersList, view, imageResolutionChanger)
+        val companyAdapter = CompanyAdapter(
+            membersListCopy,
+            view,
+            internalStorageManager,
+            imageScaler
+        )
         val gridLayoutManager = GridLayoutManager(
             activity, 4,
             GridLayoutManager.VERTICAL,
@@ -98,19 +123,25 @@ class CompanyFragment : Fragment() {
         }
     }
 
-    private fun addMemberToRecyclerView(name: String, photoDrawable: Drawable) {
-        val newMember = CompanyMember(name, photoDrawable)
+    private fun processNewMember(name: String, imageBitmap: Bitmap) {
+        companyViewModel.apply {
+            addNewMember(
+                name, imageBitmap,
+                internalStorageManager
+            ).let { newMember ->
+                membersListCopy += newMember // updating copy for CompanyRecyclerView
+            }
 
-        membersList += newMember
-        companyViewModel.addMember(newMember)
-
+            saveMemberList()
+        }
+        
         companyRecyclerView.adapter!!.notifyItemInserted(
-            membersList.size - 1
+            membersListCopy.size - 1
         )
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance() = CompanyFragment()
-    }
+//    companion object {
+//        @JvmStatic
+//        fun newInstance() = CompanyFragment()
+//    }
 }
