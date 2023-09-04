@@ -1,12 +1,10 @@
 package com.kostuciy.letsbooze.fragments
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -16,8 +14,6 @@ import com.kostuciy.letsbooze.companies.CompanyAdapter
 import com.kostuciy.letsbooze.companies.CompanyMember
 import com.kostuciy.letsbooze.data.CompanyViewModel
 import com.kostuciy.letsbooze.companies.MemberRegistrationPopup
-import com.kostuciy.letsbooze.data.InternalStorageManager
-import com.kostuciy.letsbooze.utils.ImageScaler
 
 class CompanyFragment : Fragment() {
     private lateinit var addMemberButton: Button
@@ -25,17 +21,10 @@ class CompanyFragment : Fragment() {
 
     private lateinit var companyViewModel: CompanyViewModel
 //    private val companyViewModel: CompanyViewModel by activityViewModels()
-    private lateinit var internalStorageManager: InternalStorageManager
 
     private lateinit var memberRegistrationPopup: MemberRegistrationPopup
-    private lateinit var imageScaler: ImageScaler
 
     private lateinit var membersListCopy: MutableList<CompanyMember>
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        initDataStorages()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,7 +35,6 @@ class CompanyFragment : Fragment() {
 
         initDataStorages()
 
-        imageScaler = ImageScaler()
         initViews(view)
         initListeners(view)
 
@@ -65,11 +53,6 @@ class CompanyFragment : Fragment() {
 
 //        companyViewModel.uploadMemberList()
         membersListCopy = companyViewModel.currentMembersList.toMutableList()
-
-//        InternalStorageManager
-        internalStorageManager = InternalStorageManager(
-            requireActivity().application
-        )
     }
 
     private fun initViews(view: View) {
@@ -87,17 +70,12 @@ class CompanyFragment : Fragment() {
 
         memberRegistrationPopup.apply {
             addButton.setOnClickListener {
-                val name =
-                    this.nameEditText.text.toString()
-                val imageBitmap =
-                    this.photoImageView.drawable.toBitmap()
-
-                processNewMember(name, imageBitmap)
-                memberRegistrationPopup.dismiss()
+                uploadDataToViewModel(companyViewModel).let { newMember ->
+                    updateRecyclerView(newMember)
+                }
             }
-
             pictureSelectButton.setOnClickListener {
-                memberRegistrationPopup.openGalleryForResult()
+                openGalleryForResult()
             }
         }
     }
@@ -107,9 +85,7 @@ class CompanyFragment : Fragment() {
 
         val companyAdapter = CompanyAdapter(
             membersListCopy,
-            view,
-            internalStorageManager,
-            imageScaler
+            view
         )
         val gridLayoutManager = GridLayoutManager(
             activity, 4,
@@ -123,25 +99,11 @@ class CompanyFragment : Fragment() {
         }
     }
 
-    private fun processNewMember(name: String, imageBitmap: Bitmap) {
-        companyViewModel.apply {
-            addNewMember(
-                name, imageBitmap,
-                internalStorageManager
-            ).let { newMember ->
-                membersListCopy += newMember // updating copy for CompanyRecyclerView
-            }
-
-            saveMemberList()
-        }
+    private fun updateRecyclerView(newMember: CompanyMember) {
+        membersListCopy += newMember // updating copy for CompanyRecyclerView
         
         companyRecyclerView.adapter!!.notifyItemInserted(
             membersListCopy.size - 1
         )
     }
-
-//    companion object {
-//        @JvmStatic
-//        fun newInstance() = CompanyFragment()
-//    }
 }

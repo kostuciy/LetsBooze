@@ -28,9 +28,9 @@ class CompanyViewModel : ViewModel() {
         get() = _currentMembersList.toList()
 
     fun addNewMember(
-        name: String, bitmapImage: Bitmap,
-        internalStorageManager: InternalStorageManager
+        name: String, bitmapImage: Bitmap
     ): CompanyMember {
+        val internalStorageManager = InternalStorageManager.get()
         val photoImagePath =
             internalStorageManager.saveImageToInternalStorage(bitmapImage, name)
 

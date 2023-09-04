@@ -7,16 +7,14 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.kostuciy.letsbooze.utils.ImageScaler
 import com.kostuciy.letsbooze.R
 import com.kostuciy.letsbooze.data.InternalStorageManager
 
+const val DEFAULT_MEMBER_PHOTO = R.drawable.ic_launcher_background // TODO: set another default
 
 class CompanyAdapter(
     private val memberList: List<CompanyMember>,
     private val viewContext: View,
-    private val internalStorageManager: InternalStorageManager,
-    private val imageScaler: ImageScaler
     ) :
     RecyclerView.Adapter<CompanyAdapter.MemberViewHolder>() {
     /**
@@ -35,54 +33,37 @@ class CompanyAdapter(
         fun setData(
             memberData: CompanyMember,
             viewContext: View,
-            internalStorageManager: InternalStorageManager,
-            imageScaler: ImageScaler
         ) {
             val memberName = memberData.name
             nameTextView.text = memberName
 
 //            loading bitmapImage from storage, editing and setting it to imageView
-            val bitmapImage: Bitmap? = internalStorageManager
-                .getBitmapFromInternalStorage(memberData.photoImagePath)?.let {
-                    imageScaler.scaleBitmap(it, 312)
-                }
+            val internalStorageManager = InternalStorageManager.get()
+            val bitmapScaler = InternalStorageManager.BitmapScaler()
 
+            val bitmapImage: Bitmap? = internalStorageManager
+                .getBitmapFromInternalStorage(memberData.photoImagePath)
+                ?.let {
+                    bitmapScaler.scaleBitmap(it, 312)
+                }
 
             val sideSize = viewContext.width / 4
             photoImageView.apply {
                 if (bitmapImage != null) setImageBitmap(bitmapImage)
-                else setImageResource(R.drawable.ic_launcher_background)
+                else setImageResource(DEFAULT_MEMBER_PHOTO)
+
                 adjustViewBounds = true
                 layoutParams = ViewGroup.LayoutParams(sideSize, sideSize)
                 scaleType = ImageView.ScaleType.CENTER_CROP
             }
-//
-//                ?.let {
-//                    imageScaler.scaleBitmap(it, 312)
-//                } ?: throw IllegalArgumentException("Null bitmap was received")
-//
-//            editAndSetImage(photoImageView, bitmapImage, viewContext.width / 4)
         }
-
-//        private fun editAndSetImage(
-//            photoImageView: ImageView,
-//            bitmapImage: Bitmap,
-//            sideSize: Int
-//        ) {
-//            photoImageView.apply {
-//                setImageBitmap(bitmapImage)
-//                adjustViewBounds = true
-//                layoutParams = ViewGroup.LayoutParams(sideSize, sideSize)
-//                scaleType = ImageView.ScaleType.CENTER_CROP
-//            }
-//        }
     }
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): MemberViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.company_member_card, viewGroup, false)
+            .inflate(R.layout.company_recycler_view_item, viewGroup, false)
 
         return MemberViewHolder(view)
     }
@@ -95,13 +76,10 @@ class CompanyAdapter(
 
         memberViewHolder.setData(
             currentMember,
-            viewContext,
-            internalStorageManager,
-            imageScaler
+            viewContext
         )
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = memberList.size
-
 }

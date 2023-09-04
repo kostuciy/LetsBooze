@@ -17,24 +17,48 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.FragmentActivity
 import com.kostuciy.letsbooze.R
+import com.kostuciy.letsbooze.data.CompanyViewModel
 
 
 class MemberRegistrationPopup(
-    context: FragmentActivity,
+    private val context: FragmentActivity,
 )
     : PopupWindow() {
-    private val registrationView: View =
-        LayoutInflater.from(context)
+    private val registrationView: View = LayoutInflater.from(context)
             .inflate(R.layout.member_registration_popup, null)
 
-    val photoImageView: ImageView =
+    private val photoImageView: ImageView =
         registrationView.findViewById(R.id.photoImageView)
+    private val nameEditText: EditText =
+        registrationView.findViewById(R.id.nameEditText)
     val addButton: Button =
         registrationView.findViewById(R.id.addButton)
     val pictureSelectButton: Button =
         registrationView.findViewById(R.id.pictureSelectButton)
-    val nameEditText: EditText =
-        registrationView.findViewById(R.id.nameEditText)
+
+    private val galleryLauncher = context.registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+//            There are no request codes
+            val data: Intent? = result.data
+
+//            getting uri, setting it to image and uploading to internal storage
+            if (data != null) {
+                val selectedImageUri: Uri? = data.data
+                setImageView(selectedImageUri)
+            }
+        }
+    }
+
+    fun openGalleryForResult() {
+        val galleryIntent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        )
+
+        galleryLauncher.launch(galleryIntent)
+    }
 
     fun setupPopup() {
         photoImageView.setImageResource(R.drawable.ic_launcher_foreground) // TODO: set another default
@@ -43,6 +67,20 @@ class MemberRegistrationPopup(
         height = WindowManager.LayoutParams.WRAP_CONTENT
         width = WindowManager.LayoutParams.MATCH_PARENT
         isFocusable = true
+
+    }
+
+    fun uploadDataToViewModel(companyViewModel: CompanyViewModel): CompanyMember {
+        val memberName = nameEditText.text.toString()
+        val bitmapImage = photoImageView.drawable.toBitmap()
+
+        val newMember =
+            companyViewModel.addNewMember(memberName, bitmapImage)
+        companyViewModel.saveMemberList()
+
+        dismiss()
+
+        return newMember
     }
 
     fun showPopup(view: View) {
@@ -55,36 +93,13 @@ class MemberRegistrationPopup(
         photoImageView.setImageResource(R.drawable.ic_launcher_foreground)
     }
 
-    fun openGalleryForResult() {
-        val galleryIntent = Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        )
 
-        galleryLauncher.launch(galleryIntent)
-    }
-
-    private var galleryLauncher = context.registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // There are no request codes
-            val data: Intent? = result.data
-
-            if (data != null) {
-                val selectedImageUri: Uri? = data.data
-                setPhoto(selectedImageUri)
-            }
-        }
-    }
-
-    private fun setPhoto(imageUri: Uri?) {
+    private fun setImageView(imageUri: Uri?) {
         if (imageUri == null) return
 
         val sizeParams = LinearLayout.LayoutParams(
             registrationView.width / 2, registrationView.width / 2
         )
-
         photoImageView.apply {
             setImageURI(imageUri)
             layoutParams = sizeParams
