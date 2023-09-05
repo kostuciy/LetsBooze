@@ -20,7 +20,6 @@ class CompanyFragment : Fragment() {
     private lateinit var companyRecyclerView: RecyclerView
 
     private lateinit var companyViewModel: CompanyViewModel
-//    private val companyViewModel: CompanyViewModel by activityViewModels()
 
     private lateinit var memberRegistrationPopup: MemberRegistrationPopup
 
@@ -33,26 +32,22 @@ class CompanyFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_company, container, false)
 
-        initDataStorages()
-
+        initViewModel()
         initViews(view)
         initListeners(view)
 
         return view
     }
 
-//    override fun onPause() {
-//        super.onPause()
-//        companyViewModel.saveMemberList()
-//    }
-
-    private fun initDataStorages() {
-////        ViewModel
+    private fun initViewModel() {
         val _companyViewModel : CompanyViewModel by activityViewModels()
         companyViewModel = _companyViewModel
 
-//        companyViewModel.uploadMemberList()
-        membersListCopy = companyViewModel.currentMembersList.toMutableList()
+//        copying list to give to recycler view + creating
+//        empty member, that will be used as add button
+        membersListCopy =
+            companyViewModel.currentMembersList.toMutableList()
+//        membersListCopy += CompanyMember("", "") TODO: figure out how to add empty member
     }
 
     private fun initViews(view: View) {
@@ -74,7 +69,7 @@ class CompanyFragment : Fragment() {
                     updateRecyclerView(newMember)
                 }
             }
-            pictureSelectButton.setOnClickListener {
+            photoImageView.setOnClickListener {
                 openGalleryForResult()
             }
         }
@@ -85,7 +80,8 @@ class CompanyFragment : Fragment() {
 
         val companyAdapter = CompanyAdapter(
             membersListCopy,
-            view
+            view,
+            this
         )
         val gridLayoutManager = GridLayoutManager(
             activity, 4,

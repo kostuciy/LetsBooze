@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.FragmentActivity
 import com.kostuciy.letsbooze.R
@@ -27,14 +28,12 @@ class MemberRegistrationPopup(
     private val registrationView: View = LayoutInflater.from(context)
             .inflate(R.layout.member_registration_popup, null)
 
-    private val photoImageView: ImageView =
-        registrationView.findViewById(R.id.photoImageView)
     private val nameEditText: EditText =
         registrationView.findViewById(R.id.nameEditText)
+    val photoImageView: ImageView =
+        registrationView.findViewById(R.id.photoImageView)
     val addButton: Button =
         registrationView.findViewById(R.id.addButton)
-    val pictureSelectButton: Button =
-        registrationView.findViewById(R.id.pictureSelectButton)
 
     private val galleryLauncher = context.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -93,17 +92,18 @@ class MemberRegistrationPopup(
         photoImageView.setImageResource(R.drawable.ic_launcher_foreground)
     }
 
-
     private fun setImageView(imageUri: Uri?) {
         if (imageUri == null) return
 
-        val sizeParams = LinearLayout.LayoutParams(
-            registrationView.width / 2, registrationView.width / 2
-        )
+        val sideSize = registrationView.width / 2
         photoImageView.apply {
             setImageURI(imageUri)
-            layoutParams = sizeParams
             scaleType = ImageView.ScaleType.CENTER_CROP
+            layoutParams.width = sideSize
+            layoutParams.height = layoutParams.width
+            requestLayout()
+
+            requestLayout()
         }
     }
 }

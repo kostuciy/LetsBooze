@@ -7,56 +7,44 @@
     android:background="@color/white"
     android:backgroundTint="@color/white"
     android:paddingHorizontal="10dp"
-    android:paddingVertical="10dp"
-    tools:context=".fragments.MemberCreationFragment">
+    android:paddingVertical="10dp">
 
     <!-- TODO: Update blank fragment layout -->
 
     <EditText
         android:id="@+id/nameEditText"
-        android:layout_width="0dp"
+        android:layout_width="392dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
         android:ems="10"
         android:hint="@string/name_field_hint"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/photoImageView" />
-
-    <Button
-        android:id="@+id/pictureSelectButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="5dp"
-        android:paddingVertical="5dp"
-        android:text="@string/select_photo_button"
-        app:layout_constraintBottom_toTopOf="@+id/nameEditText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/photoImageView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/addButton"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="40dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:text="@string/add_button"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.473"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nameEditText"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/photoImageView" />
 
     <ImageView
         android:id="@+id/photoImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="10dp"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nameEditText"
         tools:src="@tools:sample/avatars" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
