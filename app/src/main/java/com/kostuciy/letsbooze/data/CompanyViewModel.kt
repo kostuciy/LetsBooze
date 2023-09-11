@@ -23,7 +23,6 @@ class CompanyViewModel : ViewModel() {
             }
     }
 
-
     val currentMembersList: List<CompanyMember>
         get() = _currentMembersList.toList()
 
@@ -37,11 +36,40 @@ class CompanyViewModel : ViewModel() {
         val newMember = CompanyMember(name, photoImagePath)
         _currentMembersList += newMember
 
+        saveMemberList()
+
         return newMember
     }
 
+    fun editMember(indexPosition: Int, newName: String, newBitmap: Bitmap?): CompanyMember {
+        val internalStorageManager = InternalStorageManager.get()
+        _currentMembersList[indexPosition].let {
+            internalStorageManager.removeImageFileFromStorage(it.photoImagePath)
+        }
 
-    fun saveMemberList() {
+        val newPath = if (newBitmap != null)
+            internalStorageManager.saveImageToInternalStorage(newBitmap, newName)
+        else ""
+
+        val newMember = CompanyMember(newName, newPath)
+        _currentMembersList[indexPosition] = newMember
+
+        saveMemberList()
+
+        return newMember
+    }
+
+    fun removeMember(indexPosition: Int) {
+        val memberToRemove = _currentMembersList[indexPosition]
+        _currentMembersList.removeAt(indexPosition)
+
+        val internalStorageManager = InternalStorageManager.get()
+        internalStorageManager.removeImageFileFromStorage(memberToRemove.photoImagePath)
+
+        saveMemberList()
+    }
+
+    private fun saveMemberList() {
         PreferencesManager
             .get()
             .put(

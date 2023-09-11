@@ -7,4 +7,6 @@
     <string name="add_button">Add</string>
     <string name="select_photo_button">Select image</string>
     <string name="name_field_hint">Enter name</string>
+    <string name="edit_button">Apply changes</string>
+    <string name="delete_member_button">Delete member</string>
 </resources>

@@ -23,14 +23,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/addButton"
+        android:id="@+id/applyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingHorizontal="40dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:text="@string/add_button"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/edit_button"
+        app:layout_constraintEnd_toStartOf="@+id/deleteMemberButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/photoImageView" />
 
@@ -46,5 +46,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nameEditText"
         tools:src="@tools:sample/avatars" />
+
+    <Button
+        android:id="@+id/deleteMemberButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/delete_member_button"
+        app:layout_constraintBottom_toBottomOf="@+id/applyButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/applyButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

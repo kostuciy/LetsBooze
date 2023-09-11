@@ -1,50 +1,75 @@
 package com.kostuciy.letsbooze.companies
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.kostuciy.letsbooze.R
 import com.kostuciy.letsbooze.data.InternalStorageManager
 import com.kostuciy.letsbooze.fragments.CompanyFragment
 
-const val DEFAULT_MEMBER_PHOTO = R.drawable.ic_launcher_background // TODO: set another default
+const val DEFAULT_MEMBER_PHOTO = R.drawable.ic_launcher_foreground // TODO: set another default
 
 const val TYPE_MEMBER = 0
-const val TYPE_ADD = 1
+const val TYPE_ADDER = 1
 
 class CompanyAdapter(
     private val memberList: List<CompanyMember>,
     private val viewContext: View,
-    private val fragmentContext: CompanyFragment // TODO: check if I need this
+    private val companyPopup: CompanyFragment.CompanyPopup
     ) :
     RecyclerView.Adapter<CompanyAdapter.MemberViewHolder>() {
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder)
      */
-    private var onClickListener: View.OnClickListener? = null
 
-
-    class MemberViewHolder(
+    inner class MemberViewHolder(
+        private val isAdder: Boolean,
         memberView: View
     ) : RecyclerView.ViewHolder(memberView) {
-        private val nameTextView: TextView =
+        private val nameTextView: TextView = // TODO: change to nullable when redesigning
             memberView.findViewById(R.id.nameTextView)
-        private val photoImageView: ImageView? =
+        private val photoImageView: ImageView? = // TODO: change to non-nullable when redesigning
             memberView.findViewById(R.id.photoImageView)
 
-        fun setData(
+//        listener to items that activate popup
+        private var adderClickListener: OnClickListener = object : OnClickListener {
+            override fun onClick(view: View?) {
+                companyPopup.apply {
+                    setPopupForRegistration()
+                    showPopup(viewContext)
+                    currentMemberPosition = -1
+                }
+            }
+        }
+        private var editingClickListener: OnClickListener = object : OnClickListener {
+            override fun onClick(view: View?) {
+                companyPopup.apply {
+                    setPopupForEditing(memberList[layoutPosition])
+                    showPopup(viewContext)
+                    currentMemberPosition = layoutPosition // excluding add item TODO: rework
+                }
+            }
+        }
+
+        init {
+            memberView.setOnClickListener(
+                if (isAdder) adderClickListener
+                else editingClickListener
+            )
+        }
+
+        fun setMemberData(
             memberData: CompanyMember,
             viewContext: View,
         ) {
 //            check if it uses add item view
-            if (photoImageView == null) return
+            if (isAdder) return
 
             val memberName = memberData.name
             nameTextView.text = memberName
@@ -60,7 +85,7 @@ class CompanyAdapter(
                 }
 
             val sideSize = viewContext.width / 4
-            photoImageView.apply {
+            photoImageView!!.apply {
                 if (bitmapImage != null) setImageBitmap(bitmapImage)
                 else setImageResource(DEFAULT_MEMBER_PHOTO)
 
@@ -69,23 +94,27 @@ class CompanyAdapter(
                 scaleType = ImageView.ScaleType.CENTER_CROP
             }
         }
+
     }
 
     override fun getItemViewType(position: Int): Int =
-        if (position != itemCount - 1) TYPE_MEMBER
-        else TYPE_ADD
+        if (position != 0) TYPE_MEMBER
+        else TYPE_ADDER
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): MemberViewHolder {
         // Create a new view, which defines the UI of the list item
+        val isAdder = viewType == TYPE_ADDER
         val viewResource =
-            if (viewType == TYPE_MEMBER) R.layout.company_recycler_view_item
+            if (!isAdder) R.layout.company_recycler_view_item
             else R.layout.company_recycler_view_add_item
 
         val view = LayoutInflater.from(viewGroup.context)
             .inflate(viewResource, viewGroup, false)
 
-        return MemberViewHolder(view)
+        return MemberViewHolder(
+            isAdder,view
+        )
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -94,7 +123,7 @@ class CompanyAdapter(
         // contents of the view with that element
         val currentMember = memberList[position]
 
-        memberViewHolder.setData(
+        memberViewHolder.setMemberData(
             currentMember,
             viewContext
         )
