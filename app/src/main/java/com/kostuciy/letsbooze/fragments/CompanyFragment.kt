@@ -2,6 +2,7 @@ package com.kostuciy.letsbooze.fragments
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -43,7 +44,6 @@ class CompanyFragment : Fragment() {
 
         initViewModel()
         initViews(view)
-        initListeners(view)
 
         return view
     }
@@ -67,39 +67,6 @@ class CompanyFragment : Fragment() {
         initRecyclerView(view)
 //        initPopupWindow()
     }
-
-    private fun initListeners(view: View) {
-//        companyPopup.apply {
-//            applyChangesButton!!.setOnClickListener {
-//                updateRecyclerView(uploadDataToViewModel(companyViewModel))
-//            }
-//            photoImageView!!.setOnClickListener {
-//                openGalleryForResult()
-//            }
-//        }
-
-//        (companyRecyclerView.adapter as CompanyAdapter).apply {
-//            setAdderClickListener {
-//                companyPopup.apply {
-//                    setPopupForRegistration()
-//                    showPopup(view)
-//                }
-//            }
-//        }
-    }
-
-//    private fun initPopupWindow() {
-//        companyMemberPopupWindow = PopupWindow(requireActivity())
-//
-//        companyMemberPopupWindow.apply {
-//            photoImageView.setImageResource(R.drawable.ic_launcher_foreground) // TODO: set another default
-//
-//            contentView = registrationView
-//            height = WindowManager.LayoutParams.WRAP_CONTENT
-//            width = WindowManager.LayoutParams.MATCH_PARENT
-//            isFocusable = true
-//        }
-//    }
 
     private fun initRecyclerView(view: View) {
         companyRecyclerView = view.findViewById(R.id.companyRecyclerView)
@@ -189,25 +156,51 @@ class CompanyFragment : Fragment() {
             contentView = registrationView
             initViews(false)
             photoImageView!!.setImageResource(R.drawable.ic_launcher_foreground) // TODO: set another default
-            setupParams()
+            initParams()
 
             initListeners(false)
         }
 
         fun setPopupForEditing(selectedMember: CompanyMember) {
             contentView = editingView
-            setupParams()
             initViews(true)
+            initParams()
 
             InternalStorageManager.get().let {
                 val path = selectedMember.photoImagePath
                 val bitmap = it.getBitmapFromInternalStorage(path)
 
-                photoImageView!!.setImageBitmap(bitmap)
+                setImageView(bitmap)
             }
             nameEditText!!.setText(selectedMember.name)
 
             initListeners(true)
+        }
+
+        private fun setImageView(imageUri: Uri?) {
+            if (imageUri == null) return
+
+            photoImageView!!.apply {
+                val sideSize = registrationView.width / 2
+
+                setImageURI(imageUri)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                layoutParams.width = sideSize
+                layoutParams.height = layoutParams.width
+                requestLayout()
+            }
+        }
+
+        private fun setImageView(bitmap: Bitmap?) {
+            photoImageView!!.apply {
+                val sideSize = registrationView.width / 2
+
+                setImageBitmap(bitmap)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                layoutParams.width = sideSize
+                layoutParams.height = layoutParams.width
+                requestLayout()
+            }
         }
 
         private fun initListeners(isEditing: Boolean) {
@@ -243,14 +236,10 @@ class CompanyFragment : Fragment() {
             }
         }
 
-        private fun setupParams() {
+        private fun initParams() {
             height = WindowManager.LayoutParams.WRAP_CONTENT
             width = WindowManager.LayoutParams.MATCH_PARENT
             isFocusable = true
-        }
-
-        fun showPopup(view: View) {
-            showAtLocation(view, Gravity.TOP, 0, 0)
         }
 
         private fun initViews(isEditing: Boolean) {
@@ -260,6 +249,16 @@ class CompanyFragment : Fragment() {
 
             if (isEditing)
                 deleteMemberButton = contentView.findViewById(R.id.deleteMemberButton)
+        }
+
+        fun showPopup(view: View) {
+            showAtLocation(view, Gravity.TOP, 0, 0)
+        }
+
+        override fun dismiss() {
+            super.dismiss()
+            nameEditText!!.text.clear()
+            photoImageView!!.setImageResource(R.drawable.ic_launcher_foreground)
         }
 
         private fun addNewMemberToViewModel(companyViewModel: CompanyViewModel): CompanyMember {
@@ -279,30 +278,15 @@ class CompanyFragment : Fragment() {
             val bitmapImage = photoImageView!!.drawable?.toBitmap()
 
             val editedMember =
-                companyViewModel.editMember(currentMemberPosition - 1, memberName, bitmapImage)
+                companyViewModel.editMember(
+                    currentMemberPosition - 1,
+                    memberName,
+                    bitmapImage
+                )
 
             dismiss()
 
             return editedMember
-        }
-
-        override fun dismiss() {
-            super.dismiss()
-            nameEditText!!.text.clear()
-            photoImageView!!.setImageResource(R.drawable.ic_launcher_foreground)
-        }
-
-        private fun setImageView(imageUri: Uri?) {
-            if (imageUri == null) return
-
-            val sideSize = registrationView.width / 2
-            photoImageView!!.apply {
-                setImageURI(imageUri)
-                scaleType = ImageView.ScaleType.CENTER_CROP
-                layoutParams.width = sideSize
-                layoutParams.height = layoutParams.width
-                requestLayout()
-            }
         }
     }
 }

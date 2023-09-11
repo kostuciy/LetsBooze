@@ -38,22 +38,18 @@ class CompanyAdapter(
             memberView.findViewById(R.id.photoImageView)
 
 //        listener to items that activate popup
-        private var adderClickListener: OnClickListener = object : OnClickListener {
-            override fun onClick(view: View?) {
-                companyPopup.apply {
-                    setPopupForRegistration()
-                    showPopup(viewContext)
-                    currentMemberPosition = -1
-                }
+        private var adderClickListener: OnClickListener = OnClickListener {
+            companyPopup.apply {
+                setPopupForRegistration()
+                showPopup(viewContext)
+                currentMemberPosition = -1
             }
         }
-        private var editingClickListener: OnClickListener = object : OnClickListener {
-            override fun onClick(view: View?) {
-                companyPopup.apply {
-                    setPopupForEditing(memberList[layoutPosition])
-                    showPopup(viewContext)
-                    currentMemberPosition = layoutPosition // excluding add item TODO: rework
-                }
+        private var editingClickListener: OnClickListener = OnClickListener {
+            companyPopup.apply {
+                setPopupForEditing(memberList[layoutPosition])
+                showPopup(viewContext)
+                currentMemberPosition = layoutPosition // excluding add item TODO: rework
             }
         }
 

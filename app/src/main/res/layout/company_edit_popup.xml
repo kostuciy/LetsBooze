@@ -13,7 +13,7 @@
 
     <EditText
         android:id="@+id/nameEditText"
-        android:layout_width="392dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/name_field_hint"
